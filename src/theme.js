@@ -1,0 +1,31 @@
+export const FORGE = {
+  bg:        '#06091a',
+  bg2:       '#0a1027',
+  surface:   '#0e1530',
+  surface2:  '#161e3d',
+  line:      'rgba(150,180,235,0.10)',
+  lineSoft:  'rgba(150,180,235,0.05)',
+  lineHot:   'rgba(150,180,235,0.22)',
+  fg:        '#f0f4ff',
+  fgDim:     'rgba(232,238,255,0.6)',
+  fgFaint:   'rgba(232,238,255,0.35)',
+  blue:      '#3aa8ff',
+  blueGlow:  '#138fdb',
+  cyan:      '#5dd7ff',
+  fire:      '#ff7a1a',
+  fireGlow:  '#f36100',
+  green:     '#22e08a',
+  purple:    '#a47cff',
+  yellow:    '#ffce4b',
+  sans:      '"Space Grotesk", "Inter Tight", system-ui, sans-serif',
+  mono:      '"JetBrains Mono", ui-monospace, monospace',
+};
+
+export const TIER = {
+  common: FORGE.cyan,
+  rare:   FORGE.blue,
+  epic:   FORGE.purple,
+  legend: FORGE.yellow,
+  boss:   FORGE.fire,
+  rest:   FORGE.green,
+};
