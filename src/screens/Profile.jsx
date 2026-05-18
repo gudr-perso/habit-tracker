@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
+import { useApp } from '../AppContext'
 import Status from '../components/Status'
 import ForgeBox from '../components/ForgeBox'
 import ForgeTag from '../components/ForgeTag'
@@ -29,6 +30,10 @@ const TITLES = [
 
 export default function Profile() {
   const navigate = useNavigate()
+  const { profile } = useApp()
+  const p = profile || {}
+  const xpPct = p.xp_next ? Math.min(p.xp / p.xp_next, 1) : 0
+  const initial = (p.name || 'R')[0].toUpperCase()
 
   return (
     <div style={{ flex: 1, background: FORGE.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
@@ -39,12 +44,12 @@ export default function Profile() {
       <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', zIndex: 1, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{ width: 60, height: 60, borderRadius: 16, background: `linear-gradient(135deg, ${FORGE.blueGlow}, ${FORGE.purple})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontFamily: FORGE.sans, fontSize: 24, boxShadow: `0 0 20px ${FORGE.blueGlow}88, inset 0 0 0 1.5px rgba(255,255,255,0.18)` }}>R</div>
-            <div style={{ position: 'absolute', bottom: -4, right: -4, padding: '2px 7px', borderRadius: 5, background: FORGE.bg, border: `1px solid ${FORGE.lineHot}`, fontFamily: FORGE.mono, fontSize: 10, fontWeight: 700, color: FORGE.cyan, letterSpacing: 0.5, boxShadow: `0 0 8px ${FORGE.cyan}33` }}>LV 12</div>
+            <div style={{ width: 60, height: 60, borderRadius: 16, background: `linear-gradient(135deg, ${FORGE.blueGlow}, ${FORGE.purple})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontFamily: FORGE.sans, fontSize: 24, boxShadow: `0 0 20px ${FORGE.blueGlow}88, inset 0 0 0 1.5px rgba(255,255,255,0.18)` }}>{initial}</div>
+            <div style={{ position: 'absolute', bottom: -4, right: -4, padding: '2px 7px', borderRadius: 5, background: FORGE.bg, border: `1px solid ${FORGE.lineHot}`, fontFamily: FORGE.mono, fontSize: 10, fontWeight: 700, color: FORGE.cyan, letterSpacing: 0.5, boxShadow: `0 0 8px ${FORGE.cyan}33` }}>LV {p.level ?? 1}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: FORGE.sans, fontSize: 22, fontWeight: 700, color: FORGE.fg, letterSpacing: -0.4, lineHeight: 1.05 }}>Romain</div>
-            <div style={{ marginTop: 4 }}><ForgeTag color={FORGE.cyan}>« Constant » · Sage</ForgeTag></div>
+            <div style={{ fontFamily: FORGE.sans, fontSize: 22, fontWeight: 700, color: FORGE.fg, letterSpacing: -0.4, lineHeight: 1.05 }}>{p.name ?? 'Romain'}</div>
+            <div style={{ marginTop: 4 }}><ForgeTag color={FORGE.cyan}>{p.active_title ? `« ${p.active_title} »` : '« Constant »'} · {p.class ?? 'Sage'}</ForgeTag></div>
           </div>
         </div>
       </div>
@@ -53,19 +58,19 @@ export default function Profile() {
         {/* XP bar */}
         <ForgeBox accent={FORGE.purple} glow={FORGE.purple}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <ForgeTag color={FORGE.purple}>LV 12 → 13</ForgeTag>
-            <span style={{ fontFamily: FORGE.mono, fontSize: 10.5, color: FORGE.fgDim }}>1 840 / 2 500 XP</span>
+            <ForgeTag color={FORGE.purple}>LV {p.level ?? 1} → {(p.level ?? 1) + 1}</ForgeTag>
+            <span style={{ fontFamily: FORGE.mono, fontSize: 10.5, color: FORGE.fgDim }}>{p.xp ?? 0} / {p.xp_next ?? 500} XP</span>
           </div>
-          <div style={{ marginTop: 10 }}><ForgeGauge value={0.74} color={FORGE.purple} segments height={10} /></div>
-          <div style={{ marginTop: 6, fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint }}>660 XP avant LV 13 · +5% XP grâce au titre « Constant »</div>
+          <div style={{ marginTop: 10 }}><ForgeGauge value={xpPct} color={FORGE.purple} segments height={10} /></div>
+          <div style={{ marginTop: 6, fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint }}>{(p.xp_next ?? 500) - (p.xp ?? 0)} XP avant LV {(p.level ?? 1) + 1}</div>
         </ForgeBox>
 
         {/* Stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {[
-            { k: 'Série',  v: '23', sub: 'j',   c: FORGE.fire,  glow: FORGE.fireGlow, prefix: '🔥' },
-            { k: 'Record', v: '34', sub: 'j',   c: FORGE.fg },
-            { k: 'Badges', v: '14', sub: '/32', c: FORGE.yellow, glow: FORGE.yellow },
+            { k: 'Série',  v: String(p.streak ?? 0),        sub: 'j',   c: FORGE.fire,  glow: FORGE.fireGlow, prefix: '🔥' },
+            { k: 'Record', v: String(p.record_streak ?? 0), sub: 'j',   c: FORGE.fg },
+            { k: 'Badges', v: '0', sub: '/32', c: FORGE.yellow, glow: FORGE.yellow },
           ].map((s) => (
             <ForgeBox key={s.k} pad={10} glow={s.glow} accent={s.c === FORGE.fg ? undefined : s.c}>
               <div style={{ fontFamily: FORGE.mono, fontSize: 9, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 0.8 }}>{s.k}</div>

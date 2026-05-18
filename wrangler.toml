@@ -1,0 +1,16 @@
+name = "habit-tracker"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-05-18"
+
+# ── Production (branche main) ──────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "habit-tracker-db"
+database_id = "57960410-8944-4217-96bb-da25e6398b49"
+
+# ── Preview (toutes les autres branches) ──────────────────────
+[env.preview]
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "habit-tracker-db-preview"
+database_id = "48ac9cd3-9584-4e08-bd24-4a287949752b"
