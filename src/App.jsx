@@ -33,7 +33,7 @@ export default function App() {
         overflow: 'hidden',
       }}>
         <Routes>
-          <Route path="/"              element={<Navigate to="/onboarding" replace />} />
+          <Route path="/"              element={<Navigate to={localStorage.getItem('forge_ready') ? '/dashboard' : '/onboarding'} replace />} />
           <Route path="/onboarding"    element={<Onboarding />} />
           <Route path="/create"        element={<CreateHabit />} />
           <Route path="/dashboard"     element={<Dashboard />} />
