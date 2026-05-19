@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { useApp } from '../AppContext'
@@ -30,6 +30,34 @@ export default function Profile() {
   const [editName, setEditName] = useState('')
   const [editClass, setEditClass] = useState('')
   const [saving, setSaving] = useState(false)
+
+  const today = new Date().toISOString().slice(0, 10)
+  const yesterday = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10) })()
+
+  const [yesterdayData, setYesterdayData] = useState(null)
+  const [catFilter, setCatFilter] = useState('all')
+  const [togglingId, setTogglingId] = useState(null)
+
+  useEffect(() => {
+    api.getDashboard(yesterday).then(setYesterdayData).catch(console.error)
+  }, [yesterday])
+
+  async function toggleYesterday(habit) {
+    if (togglingId) return
+    setTogglingId(habit.id)
+    const newDone = habit.log?.done ? 0 : 1
+    await api.upsertLog(habit.id, {
+      date: yesterday,
+      done: newDone,
+      xp_earned: newDone ? habit.xp_per_session : 0,
+    })
+    const [updated] = await Promise.all([
+      api.getDashboard(yesterday),
+      newDone ? loadDashboard() : Promise.resolve(),
+    ])
+    setYesterdayData(updated)
+    setTogglingId(null)
+  }
 
   function startEdit() {
     setEditName(p.name || '')
@@ -125,6 +153,59 @@ export default function Profile() {
             </ForgeBox>
           ))}
         </div>
+
+        {/* Yesterday widget */}
+        {yesterdayData && yesterdayData.habits.length > 0 && (() => {
+          const yDate = new Date(yesterday + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+          const filtered = catFilter === 'pro'
+            ? yesterdayData.habits.filter(h => h.category === 'pro')
+            : yesterdayData.habits
+          const doneCnt = filtered.filter(h => h.log?.done).length
+          return (
+            <ForgeBox accent={doneCnt === filtered.length ? FORGE.green : FORGE.fire}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div>
+                  <ForgeTag color={doneCnt === filtered.length ? FORGE.green : FORGE.fire}>
+                    Hier · {doneCnt}/{filtered.length}
+                  </ForgeTag>
+                  <div style={{ fontFamily: FORGE.mono, fontSize: 9, color: FORGE.fgFaint, marginTop: 3, textTransform: 'uppercase', letterSpacing: 1 }}>{yDate}</div>
+                </div>
+                {/* Filtre pro / tout */}
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {['all', 'pro'].map(f => (
+                    <div key={f} onClick={() => setCatFilter(f)}
+                      style={{ padding: '4px 10px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
+                      {f === 'all' ? 'Tout' : 'Pro'}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {filtered.length === 0 ? (
+                <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint, textAlign: 'center', padding: '6px 0' }}>Aucune habitude "pro"</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {filtered.map(h => {
+                    const done = !!h.log?.done
+                    const isToggling = togglingId === h.id
+                    return (
+                      <div key={h.id} onClick={() => !isToggling && toggleYesterday(h)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: done ? `${h.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? h.color + '44' : FORGE.line}`, cursor: 'pointer', opacity: isToggling ? 0.5 : 1, transition: 'all 0.15s' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: done ? `${h.color}33` : 'rgba(255,255,255,0.05)', border: `1px solid ${done ? h.color : FORGE.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: done ? h.color : FORGE.fgFaint, flexShrink: 0 }}>
+                          {done ? '✓' : h.icon}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: done ? FORGE.fg : FORGE.fgDim }}>{h.name}</div>
+                          <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.fgFaint, marginTop: 1 }}>{h.category} · {done ? `+${h.xp_per_session} XP` : 'non fait'}</div>
+                        </div>
+                        {!done && <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fire, letterSpacing: 0.5 }}>rattraper</div>}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </ForgeBox>
+          )
+        })()}
 
         {/* Class card */}
         <ForgeBox accent={classInfo.color} glow={classInfo.color}>

@@ -14,19 +14,29 @@ import Gesture from '../components/Gesture'
 const ICONS = ['☾', '◯', '➤', '▤', '⊘', '◆', '★', '♥', '⚡', '◎', '✦', '▲']
 const COLORS = ['#5dd7ff', '#3aa8ff', '#ff7a1a', '#a47cff', '#4dffa0', '#ffd166', '#ffffff']
 const CATEGORIES = ['mental', 'forme', 'pro', 'autre']
+const DIFFICULTIES = [
+  { level: 1, label: 'Facile',    xp: 10 },
+  { level: 2, label: 'Moyen',     xp: 25 },
+  { level: 3, label: 'Difficile', xp: 50 },
+]
 
 function EditSheet({ habit, onSave, onCancel }) {
   const [name, setName] = useState(habit.name)
   const [icon, setIcon] = useState(habit.icon)
   const [color, setColor] = useState(habit.color)
   const [category, setCategory] = useState(habit.category)
+  const [xp, setXp] = useState(habit.xp_per_session ?? 25)
   const [showIcons, setShowIcons] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  const activeDiff = DIFFICULTIES.reduce((best, d) =>
+    Math.abs(d.xp - xp) < Math.abs(best.xp - xp) ? d : best
+  , DIFFICULTIES[1])
 
   async function save() {
     if (!name.trim() || saving) return
     setSaving(true)
-    await onSave(habit.id, { name: name.trim(), icon, color, category })
+    await onSave(habit.id, { name: name.trim(), icon, color, category, xp_per_session: xp })
     setSaving(false)
   }
 
@@ -84,6 +94,20 @@ function EditSheet({ habit, onSave, onCancel }) {
               {cat}
             </div>
           ))}
+        </div>
+
+        {/* XP / Difficulty */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>XP</div>
+          <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+            {DIFFICULTIES.map(d => (
+              <div key={d.level} onClick={() => setXp(d.xp)}
+                style={{ flex: 1, padding: '6px 4px', borderRadius: 6, textAlign: 'center', cursor: 'pointer', background: activeDiff.level === d.level ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${activeDiff.level === d.level ? FORGE.purple : FORGE.line}`, fontFamily: FORGE.mono, fontSize: 9.5, color: activeDiff.level === d.level ? FORGE.purple : FORGE.fgDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                {d.label}
+              </div>
+            ))}
+          </div>
+          <div style={{ fontFamily: FORGE.sans, fontWeight: 700, fontSize: 18, color: FORGE.purple, minWidth: 42, textAlign: 'right' }}>+{xp}</div>
         </div>
 
         <div onClick={save}
