@@ -33,7 +33,9 @@ export default function Dashboard() {
   }
 
   const { habits: allHabits, completion } = dashboard
-  const habits = catFilter === 'pro' ? allHabits.filter(h => h.category === 'pro') : allHabits
+  const habits = catFilter === 'pro'   ? allHabits.filter(h => h.category === 'pro')
+               : catFilter === 'perso' ? allHabits.filter(h => h.category !== 'pro')
+               : allHabits
   const p = profile || {}
   const xpPct = p.xp_next ? Math.min(p.xp / p.xp_next, 1) : 0
 
@@ -103,10 +105,10 @@ export default function Dashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 2px 0' }}>
           <span style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1.5 }}>Habitudes du jour</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {['all', 'pro'].map(f => (
+            {[['all', 'Tout'], ['perso', 'Perso'], ['pro', 'Pro']].map(([f, label]) => (
               <div key={f} onClick={() => setCatFilter(f)}
                 style={{ padding: '3px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
-                {f === 'all' ? 'Tout' : 'Pro'}
+                {label}
               </div>
             ))}
             <span onClick={() => navigate('/create')} style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.blue, letterSpacing: 0.5, cursor: 'pointer' }}>+ NEW</span>
