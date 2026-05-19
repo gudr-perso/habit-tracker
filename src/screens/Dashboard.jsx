@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { useApp } from '../AppContext'
@@ -21,6 +22,7 @@ function habitColor(h) {
 export default function Dashboard() {
   const navigate = useNavigate()
   const { date, dashboard, profile, loading, toggleLog } = useApp()
+  const [catFilter, setCatFilter] = useState('all')
 
   if (loading || !dashboard) {
     return (
@@ -30,7 +32,8 @@ export default function Dashboard() {
     )
   }
 
-  const { habits, completion } = dashboard
+  const { habits: allHabits, completion } = dashboard
+  const habits = catFilter === 'pro' ? allHabits.filter(h => h.category === 'pro') : allHabits
   const p = profile || {}
   const xpPct = p.xp_next ? Math.min(p.xp / p.xp_next, 1) : 0
 
@@ -96,9 +99,17 @@ export default function Dashboard() {
           <div style={{ marginTop: 10 }}><ForgeGauge value={xpPct} color={FORGE.purple} segments height={8} /></div>
         </ForgeBox>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 2px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 2px 0' }}>
           <span style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1.5 }}>Habitudes du jour</span>
-          <span onClick={() => navigate('/create')} style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.blue, letterSpacing: 0.5, cursor: 'pointer' }}>+ NEW</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {['all', 'pro'].map(f => (
+              <div key={f} onClick={() => setCatFilter(f)}
+                style={{ padding: '3px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
+                {f === 'all' ? 'Tout' : 'Pro'}
+              </div>
+            ))}
+            <span onClick={() => navigate('/create')} style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.blue, letterSpacing: 0.5, cursor: 'pointer' }}>+ NEW</span>
+          </div>
         </div>
 
         <div style={{ display: 'grid', gap: 8 }}>

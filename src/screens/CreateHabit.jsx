@@ -121,7 +121,7 @@ export default function CreateHabit() {
         </div>
 
         {/* Name + icon */}
-        <ForgeBox accent={activeColor}>
+        <ForgeBox accent={activeColor} style={{ overflow: 'visible' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
               onClick={() => setShowIconPicker(v => !v)}
