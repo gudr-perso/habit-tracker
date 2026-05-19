@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { useApp } from '../AppContext'
 import { getLevelTitle } from '../lib/levels'
+import ForgeFlame from '../components/ForgeFlame'
 import Status from '../components/Status'
 import ForgeBox from '../components/ForgeBox'
 import ForgeTag from '../components/ForgeTag'
@@ -46,6 +47,7 @@ export default function Dashboard() {
   return (
     <div style={{ flex: 1, background: FORGE.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: `radial-gradient(ellipse 60% 30% at 20% 0%, ${FORGE.blueGlow}33, transparent), radial-gradient(ellipse 50% 25% at 100% 90%, ${FORGE.fireGlow}1f, transparent)` }} />
+      <ForgeFlame streak={p.streak ?? 0} />
 
       <Status dark />
 

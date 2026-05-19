@@ -47,6 +47,30 @@ function computeStreak(logs, today) {
   return { streak, record }
 }
 
+function computeScore(habit, logs, today) {
+  let scheduledDays = null
+  if (habit.days) { try { scheduledDays = JSON.parse(habit.days) } catch {} }
+  let num = 0, den = 0
+  for (let i = 0; i < 30; i++) {
+    const d = addDays(today, -i)
+    const dow = new Date(d + 'T00:00:00').getDay()
+    const isoDay = dow === 0 ? 7 : dow
+    if (scheduledDays && !scheduledDays.includes(isoDay)) continue
+    const w = Math.pow(0.88, i)
+    num += (logs.find(l => l.date === d)?.done ? 1 : 0) * w
+    den += w
+  }
+  return den > 0 ? Math.round(num / den * 100) : 0
+}
+
+function scoreLabel(s) {
+  if (s >= 80) return 'Implacable'
+  if (s >= 60) return 'Solide'
+  if (s >= 40) return 'En forme'
+  if (s >= 20) return 'En construction'
+  return 'Démarrage'
+}
+
 function buildHeatmap(logs, today, weeks = 13) {
   const total = weeks * 7
   const doneMap = Object.fromEntries(logs.filter(l => l.done).map(l => [l.date, l]))
@@ -150,6 +174,7 @@ export default function HabitDetail() {
   const color = habit.color || FORGE.cyan
   const { streak, record } = computeStreak(logs, today)
   const totalDone = logs.filter(l => l.done).length
+  const score = computeScore(habit, logs, today)
   const { rows, numWeeks } = buildHeatmap(logs, today, 13)
 
   const last30 = logs.filter(l => l.date >= addDays(today, -29)).sort((a, b) => a.date.localeCompare(b.date))
@@ -221,6 +246,19 @@ export default function HabitDetail() {
             </ForgeBox>
           ))}
         </div>
+
+        {/* Solidité */}
+        <ForgeBox accent={color} pad={12}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <ForgeTag color={color}>Solidité · 30 jours</ForgeTag>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{ fontFamily: FORGE.sans, fontWeight: 700, fontSize: 22, color, lineHeight: 1 }}>{score}</span>
+              <span style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgDim }}>%</span>
+            </div>
+          </div>
+          <div style={{ marginTop: 8 }}><ForgeGauge value={score / 100} color={color} segments height={6} /></div>
+          <div style={{ marginTop: 5, fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint }}>{scoreLabel(score)}</div>
+        </ForgeBox>
 
         {/* Selected date action */}
         <ForgeBox accent={done ? color : selectedDate !== today ? FORGE.purple : FORGE.line} glow={done ? color : undefined}>
