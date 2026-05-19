@@ -189,7 +189,8 @@ export default function HabitDetail() {
         >⋯</span>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
         {/* Hero */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -399,6 +400,7 @@ export default function HabitDetail() {
             Aucune séance enregistrée — commence aujourd'hui !
           </div>
         )}
+        </div>
       </div>
       <Gesture />
     </div>

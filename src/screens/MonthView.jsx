@@ -77,7 +77,8 @@ export default function MonthView() {
         }
       />
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', gap: 4 }}>
           {[{ label: 'Sem.', path: '/semaine', active: false }, { label: 'Mois', path: '/mois', active: true }].map(s => (
             <div key={s.label} onClick={() => s.path && navigate(s.path)}
@@ -154,6 +155,7 @@ export default function MonthView() {
             </ForgeBox>
           </>
         )}
+        </div>
       </div>
       <ForgeNav />
       <Gesture />

@@ -125,7 +125,8 @@ export default function Profile() {
         )}
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
         {/* XP bar */}
         <ForgeBox accent={FORGE.purple} glow={FORGE.purple}>
@@ -239,6 +240,7 @@ export default function Profile() {
           onClick={() => { if (window.confirm('Relancer l\'onboarding ? Ton profil et tes habitudes sont conservés.')) { api.updateProfile({ onboarded: 0 }).then(async () => { await loadDashboard(); navigate('/onboarding') }) } }}
           style={{ textAlign: 'center', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, cursor: 'pointer', padding: '8px 0', letterSpacing: 0.5 }}
         >Relancer l'onboarding →</div>
+        </div>
       </div>
 
       <ForgeNav />

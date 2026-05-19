@@ -88,7 +88,8 @@ export default function WeekView() {
         }
       />
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', gap: 4 }}>
           {[{ label: 'Sem.', path: '/semaine', active: true }, { label: 'Mois', path: '/mois', active: false }].map(s => (
             <div key={s.label} onClick={() => s.path && navigate(s.path)}
@@ -154,6 +155,7 @@ export default function WeekView() {
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: FORGE.cyan, boxShadow: `0 0 4px ${FORGE.cyan}`, display: 'inline-block' }} /> fait</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: `${FORGE.cyan}1a`, border: `1.5px dashed ${FORGE.cyan}88`, display: 'inline-block' }} /> aujourd&rsquo;hui</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(255,255,255,0.03)', border: `1px solid ${FORGE.line}`, display: 'inline-block' }} /> manqué</span>
+        </div>
         </div>
       </div>
       <ForgeNav />

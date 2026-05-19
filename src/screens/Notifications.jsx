@@ -58,7 +58,8 @@ export default function Notifications() {
       <Status dark />
       <ForgeBar back="←" onBack={() => navigate(-1)} title="Notifications" right={null} />
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Global</div>
         <ForgeBox accent={FORGE.blue} pad={0}>
           <StaticRow title="Notifications activées" sub="autorise rappels & récaps" on={true} color={FORGE.cyan} />
@@ -119,6 +120,7 @@ export default function Notifications() {
           <StaticRow title="Récap du soir" sub="« ce que tu as fait aujourd'hui »" on={true} color={FORGE.cyan} />
           <StaticRow title="Série en danger" sub="2 h avant minuit · alerte critique" on={true} color={FORGE.fire} />
         </ForgeBox>
+        </div>
       </div>
       <Gesture />
     </div>
