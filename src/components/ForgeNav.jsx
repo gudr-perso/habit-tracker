@@ -20,6 +20,7 @@ export default function ForgeNav() {
   return (
     <div style={{
       display: 'flex', gap: 6, padding: '8px 12px',
+      paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       borderTop: `1px solid ${FORGE.line}`,
       background: FORGE.bg,
       position: 'relative', flexShrink: 0,
