@@ -21,6 +21,10 @@ const TEMPLATES = [
 const ICONS = ['☾', '◯', '➤', '▤', '⊘', '◆', '★', '♥', '⚡', '◎', '✦', '▲']
 const COLORS = ['#5dd7ff', '#3aa8ff', '#ff7a1a', '#a47cff', '#4dffa0', '#ffd166', '#ffffff']
 const CATEGORIES = ['mental', 'forme', 'pro', 'autre']
+const WEEK_DAYS = [
+  { num: 1, label: 'Lu' }, { num: 2, label: 'Ma' }, { num: 3, label: 'Me' },
+  { num: 4, label: 'Je' }, { num: 5, label: 'Ve' }, { num: 6, label: 'Sa' }, { num: 7, label: 'Di' },
+]
 const TYPES = [
   { key: 'boolean',  label: 'Fait / Pas fait' },
   { key: 'duration', label: 'Durée (minutes)' },
@@ -59,8 +63,17 @@ export default function CreateHabit() {
   const [difficulty, setDifficulty] = useState(2)
   const [saving, setSaving] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
+  const [selectedDays, setSelectedDays] = useState([1, 2, 3, 4, 5, 6, 7])
 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
+
+  function toggleDay(d) {
+    setSelectedDays(prev =>
+      prev.includes(d)
+        ? prev.length > 1 ? prev.filter(x => x !== d) : prev
+        : [...prev, d].sort((a, b) => a - b)
+    )
+  }
 
   function applyTemplate(t) {
     setForm({ name: t.name, icon: t.icon, color: t.color, category: t.category, type: t.type, reminder_time: '', xp_per_session: t.xp })
@@ -77,7 +90,8 @@ export default function CreateHabit() {
     if (!form.name.trim() || saving) return
     setSaving(true)
     try {
-      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null })
+      const days = selectedDays.length === 7 ? null : JSON.stringify(selectedDays)
+      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null, days })
       await loadDashboard()
       navigate('/dashboard')
     } catch (e) {
@@ -211,6 +225,27 @@ export default function CreateHabit() {
               <span onClick={() => set('reminder_time', '')} style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, cursor: 'pointer' }}>effacer</span>
             )}
           </div>
+        </ForgeBox>
+
+        {/* Jours */}
+        <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Jours</div>
+        <ForgeBox accent={selectedDays.length < 7 ? activeColor : undefined} pad={12}>
+          <div style={{ display: 'flex', gap: 5 }}>
+            {WEEK_DAYS.map(({ num, label }) => {
+              const active = selectedDays.includes(num)
+              return (
+                <div key={num} onClick={() => toggleDay(num)}
+                  style={{ flex: 1, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FORGE.mono, fontSize: 11, fontWeight: 700, cursor: 'pointer', background: active ? `${activeColor}22` : 'transparent', border: `1px solid ${active ? activeColor : FORGE.line}`, color: active ? activeColor : FORGE.fgFaint, transition: 'all 0.15s' }}>
+                  {label}
+                </div>
+              )
+            })}
+          </div>
+          {selectedDays.length < 7 && (
+            <div style={{ marginTop: 8, fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.fgFaint, textAlign: 'center', letterSpacing: 0.5 }}>
+              {selectedDays.length}×/semaine
+            </div>
+          )}
         </ForgeBox>
 
         {/* Difficulty / XP */}

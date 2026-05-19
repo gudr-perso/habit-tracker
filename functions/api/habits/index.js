@@ -8,12 +8,12 @@ export async function onRequestGet({ env }) {
 export async function onRequestPost({ env, request }) {
   const body = await request.json()
   const { name, icon = '☾', color = '#5dd7ff', category = 'mental', type = 'boolean',
-          frequency = 'daily', reminder_time = null, xp_per_session = 20 } = body
+          frequency = 'daily', reminder_time = null, xp_per_session = 20, days = null } = body
   if (!name) return Response.json({ error: 'name required' }, { status: 400 })
   const result = await env.DB.prepare(
-    `INSERT INTO habits (name, icon, color, category, type, frequency, reminder_time, xp_per_session)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).bind(name, icon, color, category, type, frequency, reminder_time, xp_per_session).run()
+    `INSERT INTO habits (name, icon, color, category, type, frequency, reminder_time, xp_per_session, days)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(name, icon, color, category, type, frequency, reminder_time, xp_per_session, days).run()
   const row = await env.DB.prepare('SELECT * FROM habits WHERE id = ?').bind(result.meta.last_row_id).first()
   return Response.json(row, { status: 201 })
 }

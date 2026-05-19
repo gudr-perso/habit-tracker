@@ -14,6 +14,10 @@ import Gesture from '../components/Gesture'
 const ICONS = ['☾', '◯', '➤', '▤', '⊘', '◆', '★', '♥', '⚡', '◎', '✦', '▲']
 const COLORS = ['#5dd7ff', '#3aa8ff', '#ff7a1a', '#a47cff', '#4dffa0', '#ffd166', '#ffffff']
 const CATEGORIES = ['mental', 'forme', 'pro', 'autre']
+const WEEK_DAYS = [
+  { num: 1, label: 'Lu' }, { num: 2, label: 'Ma' }, { num: 3, label: 'Me' },
+  { num: 4, label: 'Je' }, { num: 5, label: 'Ve' }, { num: 6, label: 'Sa' }, { num: 7, label: 'Di' },
+]
 const DIFFICULTIES = [
   { level: 1, label: 'Facile',    xp: 10 },
   { level: 2, label: 'Moyen',     xp: 25 },
@@ -28,6 +32,18 @@ function EditSheet({ habit, onSave, onCancel }) {
   const [xp, setXp] = useState(habit.xp_per_session ?? 25)
   const [showIcons, setShowIcons] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [selectedDays, setSelectedDays] = useState(() => {
+    if (!habit.days) return [1, 2, 3, 4, 5, 6, 7]
+    try { return JSON.parse(habit.days) } catch { return [1, 2, 3, 4, 5, 6, 7] }
+  })
+
+  function toggleDay(d) {
+    setSelectedDays(prev =>
+      prev.includes(d)
+        ? prev.length > 1 ? prev.filter(x => x !== d) : prev
+        : [...prev, d].sort((a, b) => a - b)
+    )
+  }
 
   const activeDiff = DIFFICULTIES.reduce((best, d) =>
     Math.abs(d.xp - xp) < Math.abs(best.xp - xp) ? d : best
@@ -36,7 +52,8 @@ function EditSheet({ habit, onSave, onCancel }) {
   async function save() {
     if (!name.trim() || saving) return
     setSaving(true)
-    await onSave(habit.id, { name: name.trim(), icon, color, category, xp_per_session: xp })
+    const days = selectedDays.length === 7 ? null : JSON.stringify(selectedDays)
+    await onSave(habit.id, { name: name.trim(), icon, color, category, xp_per_session: xp, days })
     setSaving(false)
   }
 
@@ -94,6 +111,19 @@ function EditSheet({ habit, onSave, onCancel }) {
               {cat}
             </div>
           ))}
+        </div>
+
+        {/* Jours */}
+        <div style={{ display: 'flex', gap: 5 }}>
+          {WEEK_DAYS.map(({ num, label }) => {
+            const active = selectedDays.includes(num)
+            return (
+              <div key={num} onClick={() => toggleDay(num)}
+                style={{ flex: 1, height: 34, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FORGE.mono, fontSize: 10, fontWeight: 700, cursor: 'pointer', background: active ? `${color}22` : 'transparent', border: `1px solid ${active ? color : FORGE.line}`, color: active ? color : FORGE.fgDim, transition: 'all 0.15s' }}>
+                {label}
+              </div>
+            )
+          })}
         </div>
 
         {/* XP / Difficulty */}
