@@ -64,6 +64,8 @@ export default function CreateHabit() {
   const [saving, setSaving] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [selectedDays, setSelectedDays] = useState([1, 2, 3, 4, 5, 6, 7])
+  const [habitMode, setHabitMode] = useState('daily')   // 'daily' | 'weekly'
+  const [weeklyTarget, setWeeklyTarget] = useState(3)
 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
 
@@ -91,7 +93,8 @@ export default function CreateHabit() {
     setSaving(true)
     try {
       const days = selectedDays.length === 7 ? null : JSON.stringify(selectedDays)
-      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null, days })
+      const weekly_target = habitMode === 'weekly' ? weeklyTarget : null
+      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null, days, weekly_target })
       await loadDashboard()
       navigate('/dashboard')
     } catch (e) {
@@ -206,6 +209,32 @@ export default function CreateHabit() {
           ))}
         </ForgeBox>
 
+        {/* Fréquence */}
+        <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Fréquence</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[['daily', 'Quotidien'], ['weekly', 'X fois/semaine']].map(([m, label]) => (
+            <div key={m} onClick={() => setHabitMode(m)}
+              style={{ flex: 1, padding: '10px 8px', borderRadius: 10, textAlign: 'center', cursor: 'pointer', background: habitMode === m ? `${activeColor}22` : FORGE.surface, border: `1px solid ${habitMode === m ? activeColor : FORGE.line}`, fontFamily: FORGE.mono, fontSize: 10, color: habitMode === m ? activeColor : FORGE.fgDim, textTransform: 'uppercase', letterSpacing: 0.8, boxShadow: habitMode === m ? `0 0 8px ${activeColor}33` : 'none', transition: 'all 0.15s' }}>
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {/* Cible hebdo */}
+        {habitMode === 'weekly' && (
+          <>
+            <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Objectif / semaine</div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                <div key={n} onClick={() => setWeeklyTarget(n)}
+                  style={{ flex: 1, height: 38, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FORGE.mono, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: weeklyTarget === n ? `${activeColor}22` : 'transparent', border: `1px solid ${weeklyTarget === n ? activeColor : FORGE.line}`, color: weeklyTarget === n ? activeColor : FORGE.fgFaint, transition: 'all 0.15s' }}>
+                  {n}×
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         {/* Reminder */}
         <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Rappel (optionnel)</div>
         <ForgeBox accent={form.reminder_time ? activeColor : undefined} pad={12}>
@@ -228,7 +257,7 @@ export default function CreateHabit() {
         </ForgeBox>
 
         {/* Jours */}
-        <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Jours</div>
+        <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>{habitMode === 'weekly' ? 'Jours disponibles' : 'Jours'}</div>
         <ForgeBox accent={selectedDays.length < 7 ? activeColor : undefined} pad={12}>
           <div style={{ display: 'flex', gap: 5 }}>
             {WEEK_DAYS.map(({ num, label }) => {

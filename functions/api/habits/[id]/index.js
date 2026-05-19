@@ -6,7 +6,7 @@ export async function onRequestGet({ env, params }) {
 
 export async function onRequestPut({ env, params, request }) {
   const body = await request.json()
-  const allowed = ['name', 'icon', 'color', 'category', 'type', 'frequency', 'reminder_time', 'xp_per_session', 'active', 'days']
+  const allowed = ['name', 'icon', 'color', 'category', 'type', 'frequency', 'reminder_time', 'xp_per_session', 'active', 'days', 'weekly_target']
   const sets = []
   const values = []
   for (const key of allowed) {

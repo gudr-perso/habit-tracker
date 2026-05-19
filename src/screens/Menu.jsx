@@ -36,6 +36,8 @@ function EditSheet({ habit, onSave, onCancel }) {
     if (!habit.days) return [1, 2, 3, 4, 5, 6, 7]
     try { return JSON.parse(habit.days) } catch { return [1, 2, 3, 4, 5, 6, 7] }
   })
+  const [habitMode, setHabitMode] = useState(habit.weekly_target ? 'weekly' : 'daily')
+  const [weeklyTarget, setWeeklyTarget] = useState(habit.weekly_target || 3)
 
   function toggleDay(d) {
     setSelectedDays(prev =>
@@ -53,7 +55,8 @@ function EditSheet({ habit, onSave, onCancel }) {
     if (!name.trim() || saving) return
     setSaving(true)
     const days = selectedDays.length === 7 ? null : JSON.stringify(selectedDays)
-    await onSave(habit.id, { name: name.trim(), icon, color, category, xp_per_session: xp, days })
+    const weekly_target = habitMode === 'weekly' ? weeklyTarget : null
+    await onSave(habit.id, { name: name.trim(), icon, color, category, xp_per_session: xp, days, weekly_target })
     setSaving(false)
   }
 
@@ -113,8 +116,36 @@ function EditSheet({ habit, onSave, onCancel }) {
           ))}
         </div>
 
+        {/* Mode fréquence */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[['daily', 'Quotidien'], ['weekly', 'X fois/sem']].map(([mode, lbl]) => (
+            <div key={mode} onClick={() => setHabitMode(mode)}
+              style={{ flex: 1, padding: '7px 0', borderRadius: 8, textAlign: 'center', cursor: 'pointer', background: habitMode === mode ? `${color}22` : 'transparent', border: `1px solid ${habitMode === mode ? color : FORGE.line}`, fontFamily: FORGE.mono, fontSize: 10, color: habitMode === mode ? color : FORGE.fgDim, letterSpacing: 0.5 }}>
+              {lbl}
+            </div>
+          ))}
+        </div>
+
+        {habitMode === 'weekly' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>Objectif</div>
+            <div style={{ display: 'flex', gap: 5, flex: 1 }}>
+              {[1,2,3,4,5,6,7].map(n => (
+                <div key={n} onClick={() => setWeeklyTarget(n)}
+                  style={{ flex: 1, height: 30, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: weeklyTarget === n ? `${color}22` : 'transparent', border: `1px solid ${weeklyTarget === n ? color : FORGE.line}`, fontFamily: FORGE.mono, fontSize: 11, fontWeight: 700, color: weeklyTarget === n ? color : FORGE.fgDim }}>
+                  {n}×
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Jours */}
-        <div style={{ display: 'flex', gap: 5 }}>
+        <div>
+          <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+            {habitMode === 'weekly' ? 'Jours disponibles' : 'Jours'}
+          </div>
+          <div style={{ display: 'flex', gap: 5 }}>
           {WEEK_DAYS.map(({ num, label }) => {
             const active = selectedDays.includes(num)
             return (
@@ -124,6 +155,7 @@ function EditSheet({ habit, onSave, onCancel }) {
               </div>
             )
           })}
+          </div>
         </div>
 
         {/* XP / Difficulty */}

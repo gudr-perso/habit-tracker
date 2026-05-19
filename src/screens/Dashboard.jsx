@@ -32,10 +32,13 @@ export default function Dashboard() {
     )
   }
 
-  const { habits: allHabits, completion } = dashboard
+  const { habits: allHabits, weeklyHabits: allWeeklyHabits = [], completion } = dashboard
   const habits = catFilter === 'pro'   ? allHabits.filter(h => h.category === 'pro')
                : catFilter === 'perso' ? allHabits.filter(h => h.category !== 'pro')
                : allHabits
+  const weeklyHabits = catFilter === 'pro'   ? allWeeklyHabits.filter(h => h.category === 'pro')
+                     : catFilter === 'perso' ? allWeeklyHabits.filter(h => h.category !== 'pro')
+                     : allWeeklyHabits
   const p = profile || {}
   const xpPct = p.xp_next ? Math.min(p.xp / p.xp_next, 1) : 0
 
@@ -151,6 +154,50 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {weeklyHabits.length > 0 && (
+          <>
+            <div style={{ padding: '4px 2px 0', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Objectifs hebdo
+            </div>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {weeklyHabits.map((h) => {
+                const color = habitColor(h)
+                const done = !!h.log?.done
+                const pct = Math.min((h.weekly_done ?? 0) / (h.weekly_target ?? 1), 1)
+                return (
+                  <ForgeBox key={h.id} pad={0} style={{ overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                      <div style={{ width: 3, background: color, boxShadow: `0 0 8px ${color}aa` }} />
+                      <div
+                        style={{ width: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? `${color}1f` : 'transparent', color, fontSize: 22, cursor: 'pointer', flexShrink: 0 }}
+                        onClick={() => toggleLog(h.id, !done, h.xp_per_session)}
+                      >
+                        {done ? <span style={{ textShadow: `0 0 8px ${color}` }}>✓</span> : h.icon}
+                      </div>
+                      <div style={{ flex: 1, padding: '10px 12px', minWidth: 0, cursor: 'pointer' }} onClick={() => navigate(`/habit/${h.id}`)}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          <span style={{ fontFamily: FORGE.sans, fontWeight: 600, fontSize: 14, color: FORGE.fg, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.name}</span>
+                          <span style={{ fontFamily: FORGE.mono, fontSize: 11, color: done ? FORGE.green : color, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            +{h.xp_per_session}<span style={{ color: FORGE.fgFaint, marginLeft: 2, fontSize: 9 }}>XP</span>
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
+                          <div style={{ flex: 1, height: 4, background: FORGE.lineSoft, borderRadius: 2 }}>
+                            <div style={{ height: '100%', width: `${pct * 100}%`, background: pct >= 1 ? FORGE.green : color, borderRadius: 2, transition: 'width 0.3s' }} />
+                          </div>
+                          <span style={{ fontFamily: FORGE.mono, fontSize: 10, color: pct >= 1 ? FORGE.green : FORGE.fgDim, whiteSpace: 'nowrap' }}>
+                            {h.weekly_done ?? 0}/{h.weekly_target} cette sem.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </ForgeBox>
+                )
+              })}
+            </div>
+          </>
+        )}
         </div>
       </div>
 
