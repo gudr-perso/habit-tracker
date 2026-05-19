@@ -9,6 +9,7 @@ import MonthView    from './screens/MonthView'
 import Stats        from './screens/Stats'
 import Profile      from './screens/Profile'
 import Notifications from './screens/Notifications'
+import Menu from './screens/Menu'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/stats"         element={<Stats />} />
           <Route path="/profil"        element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/menu"          element={<Menu />} />
         </Routes>
       </div>
     </div>

@@ -74,7 +74,8 @@ export default function HabitDetail() {
 
   const [habit, setHabit] = useState(null)
   const [logs, setLogs] = useState([])
-  const [todayLog, setTodayLog] = useState(null)
+  const [selectedDate, setSelectedDate] = useState(today)
+  const [selectedLog, setSelectedLog] = useState(null)
   const [note, setNote] = useState('')
   const [value, setValue] = useState('')
   const [saving, setSaving] = useState(false)
@@ -89,8 +90,8 @@ export default function HabitDetail() {
     ])
     setHabit(h)
     setLogs(ls)
-    const tl = ls.find(l => l.date === today) || null
-    setTodayLog(tl)
+    const tl = ls.find(l => l.date === selectedDate) || null
+    setSelectedLog(tl)
     setNote(tl?.note || '')
     setValue(tl?.value != null ? String(tl.value) : '')
     setLoading(false)
@@ -98,18 +99,28 @@ export default function HabitDetail() {
 
   useEffect(() => { load() }, [load])
 
+  function selectDate(date) {
+    const log = logs.find(l => l.date === date) || null
+    setSelectedDate(date)
+    setSelectedLog(log)
+    setNote(log?.note || '')
+    setValue(log?.value != null ? String(log.value) : '')
+    setEditingNote(false)
+  }
+
   async function handleToggle() {
     if (saving) return
     setSaving(true)
-    const newDone = todayLog?.done ? 0 : 1
+    const newDone = selectedLog?.done ? 0 : 1
     await api.upsertLog(id, {
-      date: today,
+      date: selectedDate,
       done: newDone,
       value: value ? parseFloat(value) : null,
       note: note || null,
       xp_earned: newDone ? (habit?.xp_per_session || 0) : 0,
     })
-    await Promise.all([load(), loadDashboard()])
+    if (selectedDate === today) await loadDashboard()
+    await load()
     setSaving(false)
   }
 
@@ -117,11 +128,11 @@ export default function HabitDetail() {
     if (saving) return
     setSaving(true)
     await api.upsertLog(id, {
-      date: today,
-      done: todayLog?.done || 0,
+      date: selectedDate,
+      done: selectedLog?.done || 0,
       value: value ? parseFloat(value) : null,
       note: note || null,
-      xp_earned: todayLog?.xp_earned || 0,
+      xp_earned: selectedLog?.xp_earned || 0,
     })
     await load()
     setSaving(false)
@@ -137,7 +148,6 @@ export default function HabitDetail() {
   }
 
   const color = habit.color || FORGE.cyan
-  const done = !!todayLog?.done
   const { streak, record } = computeStreak(logs, today)
   const totalDone = logs.filter(l => l.done).length
   const { rows, numWeeks } = buildHeatmap(logs, today, 13)
@@ -146,12 +156,14 @@ export default function HabitDetail() {
   const showChart = habit.type !== 'boolean' && last30.some(l => l.value)
 
   const journal = logs.filter(l => l.done).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20)
+  const done = !!selectedLog?.done
+  const isFuture = selectedDate > today
 
   function fmtDate(iso) {
     if (iso === today) return "Aujourd'hui"
     if (iso === addDays(today, -1)) return 'Hier'
     const d = new Date(iso + 'T00:00:00')
-    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
   }
 
   function fmtValue(log) {
@@ -209,33 +221,41 @@ export default function HabitDetail() {
           ))}
         </div>
 
-        {/* Today action */}
-        <ForgeBox accent={done ? color : FORGE.line} glow={done ? color : undefined}>
+        {/* Selected date action */}
+        <ForgeBox accent={done ? color : selectedDate !== today ? FORGE.purple : FORGE.line} glow={done ? color : undefined}>
+          {selectedDate !== today && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.purple, letterSpacing: 1, textTransform: 'uppercase' }}>
+                ← {fmtDate(selectedDate)}
+              </div>
+              <div onClick={() => selectDate(today)} style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, cursor: 'pointer' }}>retour à aujourd'hui ×</div>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
-              onClick={handleToggle}
+              onClick={isFuture ? undefined : handleToggle}
               style={{
-                width: 48, height: 48, borderRadius: 14, flexShrink: 0, cursor: 'pointer',
+                width: 48, height: 48, borderRadius: 14, flexShrink: 0, cursor: isFuture ? 'default' : 'pointer',
                 background: done ? `linear-gradient(135deg, ${color}cc, ${color}44)` : 'rgba(255,255,255,0.05)',
                 border: `1.5px solid ${done ? color : FORGE.line}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, color: done ? '#001022' : color,
+                fontSize: 22, color: done ? '#001022' : isFuture ? FORGE.fgFaint : color,
                 boxShadow: done ? `0 0 16px ${color}77` : 'none',
                 transition: 'all 0.2s',
               }}
-            >{done ? '✓' : habit.icon}</div>
+            >{done ? '✓' : isFuture ? '—' : habit.icon}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: FORGE.sans, fontWeight: 700, fontSize: 14, color: done ? color : FORGE.fg }}>
-                {done ? 'Fait aujourd\'hui !' : 'Marquer comme fait'}
+                {isFuture ? 'Jour futur' : done ? (selectedDate === today ? "Fait aujourd'hui !" : 'Fait ce jour-là ✓') : (selectedDate === today ? 'Marquer comme fait' : 'Pas encore fait — rattraper ?')}
               </div>
               <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgDim, marginTop: 2 }}>
-                {done ? `+${habit.xp_per_session} XP gagné` : `Tap pour valider · +${habit.xp_per_session} XP`}
+                {isFuture ? 'Impossible de logger un jour futur' : done ? `+${habit.xp_per_session} XP gagné` : `Tap pour valider · +${habit.xp_per_session} XP`}
               </div>
             </div>
           </div>
 
           {/* Value input for duration/count */}
-          {habit.type !== 'boolean' && (
+          {!isFuture && habit.type !== 'boolean' && (
             <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
               <input
                 type="number"
@@ -254,7 +274,7 @@ export default function HabitDetail() {
           )}
 
           {/* Note */}
-          {editingNote || todayLog?.note ? (
+          {!isFuture && (editingNote || selectedLog?.note) ? (
             <div style={{ marginTop: 10 }}>
               <input
                 value={note}
@@ -271,9 +291,9 @@ export default function HabitDetail() {
                 }}
               />
             </div>
-          ) : (
+          ) : !isFuture ? (
             <div onClick={() => setEditingNote(true)} style={{ marginTop: 8, fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, cursor: 'pointer' }}>+ ajouter une note</div>
-          )}
+          ) : null}
         </ForgeBox>
 
         {/* Heatmap */}
@@ -290,13 +310,17 @@ export default function HabitDetail() {
                   if (!cell) return <div key={r} style={{ width: 9, height: 9 }} />
                   const isDone = !!cell.log?.done
                   const isToday = cell.date === today
+                  const isSel = cell.date === selectedDate
                   return (
-                    <div key={r} style={{
-                      width: 9, height: 9, borderRadius: 1.5,
-                      background: isDone ? `color-mix(in oklch, ${color} 70%, #060812)` : isToday ? `${color}22` : 'rgba(255,255,255,0.04)',
-                      boxShadow: isDone ? `0 0 4px ${color}66` : 'none',
-                      border: isToday ? `1px solid ${color}66` : 'none',
-                    }} />
+                    <div key={r}
+                      onClick={() => cell.date <= today && selectDate(cell.date)}
+                      style={{
+                        width: 9, height: 9, borderRadius: 1.5,
+                        background: isDone ? `color-mix(in oklch, ${color} 70%, #060812)` : isToday ? `${color}22` : 'rgba(255,255,255,0.04)',
+                        boxShadow: isSel ? `0 0 0 1.5px ${FORGE.yellow}, 0 0 6px ${FORGE.yellow}88` : isDone ? `0 0 4px ${color}66` : 'none',
+                        border: isToday && !isSel ? `1px solid ${color}66` : 'none',
+                        cursor: cell.date <= today ? 'pointer' : 'default',
+                      }} />
                   )
                 })}
               </div>

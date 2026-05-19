@@ -6,6 +6,7 @@ const ITEMS = [
   { id: 'week',    label: 'Sem.',  path: '/semaine' },
   { id: 'stats',   label: 'Stats', path: '/stats' },
   { id: 'profile', label: 'Profil',path: '/profil' },
+  { id: 'menu',    label: '⋯',     path: '/menu' },
 ]
 
 export default function ForgeNav() {
