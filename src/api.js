@@ -26,6 +26,9 @@ export const api = {
   getLogs:   (id, from, to) => req(`/habits/${id}/logs?from=${from}&to=${to}`),
   upsertLog: (id, data)     => req(`/habits/${id}/logs`, { method: 'POST', body: data }),
 
+  /* Badges */
+  getBadges: () => req('/badges'),
+
   /* Views */
   getDashboard: (date)        => req(`/dashboard?date=${date}`),
   getWeek:      (date)        => req(`/week?date=${date}`),

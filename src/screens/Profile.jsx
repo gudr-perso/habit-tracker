@@ -283,13 +283,18 @@ export default function Profile() {
           )
         })()}
 
-        {/* Badges placeholder */}
-        <ForgeBox accent={FORGE.yellow} pad={14}>
-          <ForgeTag color={FORGE.yellow}>★ Hauts faits</ForgeTag>
-          <div style={{ marginTop: 10, fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint, textAlign: 'center', padding: '8px 0' }}>
-            Les badges seront débloqués au fil des séries et records ✦
+        {/* Hauts faits */}
+        <div onClick={() => navigate('/badges')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 14, background: FORGE.surface, border: `1px solid ${FORGE.yellow}44`, cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22 }}>★</span>
+            <div>
+              <div style={{ fontFamily: FORGE.sans, fontWeight: 700, fontSize: 14, color: FORGE.yellow }}>Hauts faits</div>
+              <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, marginTop: 2 }}>Badges & accomplissements</div>
+            </div>
           </div>
-        </ForgeBox>
+          <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint }}>→</div>
+        </div>
 
         {/* Links */}
         <div style={{ display: 'flex', gap: 8 }}>

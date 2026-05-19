@@ -11,6 +11,7 @@ import Stats         from './screens/Stats'
 import Profile       from './screens/Profile'
 import Notifications from './screens/Notifications'
 import Menu          from './screens/Menu'
+import Badges        from './screens/Badges'
 
 function SmartRedirect() {
   const { loading, profile } = useApp()
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/profil"        element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/menu"          element={<Menu />} />
+          <Route path="/badges"        element={<Badges />} />
         </Routes>
       </div>
     </div>

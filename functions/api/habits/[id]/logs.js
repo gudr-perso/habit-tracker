@@ -1,3 +1,5 @@
+import { evaluateBadges } from '../../_badgeEval.js'
+
 function getMonday(dateStr) {
   const d = new Date(dateStr + 'T00:00:00Z')
   const day = d.getUTCDay() || 7
@@ -95,8 +97,17 @@ export async function onRequestPost({ env, params, request }) {
     }
   }
 
+  // Évaluation des badges
+  const newBadges = await evaluateBadges(env, {
+    habitId: params.id,
+    date,
+    done,
+    habit,
+    weeklyTargetHit: bonusXp > 0,
+  })
+
   const row = await env.DB.prepare('SELECT * FROM habit_logs WHERE habit_id = ? AND date = ?').bind(params.id, date).first()
-  return Response.json({ ...row, weekly_target_hit: bonusXp > 0, bonus_xp: bonusXp })
+  return Response.json({ ...row, weekly_target_hit: bonusXp > 0, bonus_xp: bonusXp, new_badges: newBadges })
 }
 
 export async function onRequestOptions() {
