@@ -17,7 +17,7 @@ export async function onRequestGet({ env, request }) {
   const perHabit = habits.map(h => {
     const hLogs = logs.filter(l => l.habit_id === h.id)
     const done  = hLogs.filter(l => l.done).length
-    return { id: h.id, name: h.name, icon: h.icon, color: h.color, total: days, done, pct: done / days }
+    return { id: h.id, name: h.name, icon: h.icon, color: h.color, category: h.category, total: days, done, pct: done / days }
   })
 
   const byDate = {}

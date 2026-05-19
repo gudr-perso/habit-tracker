@@ -19,6 +19,7 @@ const RANGES = [
 
 export default function Stats() {
   const [rangeIdx, setRangeIdx] = useState(1)
+  const [catFilter, setCatFilter] = useState('all')
   const [data, setData] = useState(null)
 
   useEffect(() => {
@@ -34,7 +35,13 @@ export default function Stats() {
     )
   }
 
-  const { globalPct, perHabit, dailyChart } = data
+  const { globalPct: rawGlobalPct, perHabit: allPerHabit, dailyChart } = data
+  const perHabit = catFilter === 'pro'   ? allPerHabit.filter(r => r.category === 'pro')
+                 : catFilter === 'perso' ? allPerHabit.filter(r => r.category !== 'pro')
+                 : allPerHabit
+  const globalPct = perHabit.length
+    ? Math.round(perHabit.reduce((s, r) => s + r.done, 0) / (perHabit.length * RANGES[rangeIdx].days) * 100)
+    : rawGlobalPct
   const maxPts = Math.max(...dailyChart.map(d => d.pct), 1)
   const chartW = 300, chartH = 64
 
@@ -65,6 +72,15 @@ export default function Stats() {
               style={{ flex: 1, padding: '7px 10px', borderRadius: 8, textAlign: 'center', background: i === rangeIdx ? FORGE.surface : 'transparent', border: i === rangeIdx ? `1px solid ${FORGE.lineHot}` : `1px solid ${FORGE.line}`, color: i === rangeIdx ? FORGE.fg : FORGE.fgDim, fontFamily: FORGE.mono, fontSize: 11, fontWeight: 500, position: 'relative', cursor: 'pointer' }}>
               {i === rangeIdx && <div style={{ position: 'absolute', top: -1, left: 6, right: 6, height: 1, background: FORGE.cyan, boxShadow: `0 0 4px ${FORGE.cyan}` }} />}
               {r.label}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+          {[['all', 'Tout'], ['perso', 'Perso'], ['pro', 'Pro']].map(([f, label]) => (
+            <div key={f} onClick={() => setCatFilter(f)}
+              style={{ padding: '3px 10px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
+              {label}
             </div>
           ))}
         </div>

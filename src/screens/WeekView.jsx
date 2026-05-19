@@ -42,6 +42,7 @@ export default function WeekView() {
   const today = new Date().toISOString().slice(0, 10)
   const [refDate, setRefDate] = useState(today)
   const [data, setData] = useState(null)
+  const [catFilter, setCatFilter] = useState('all')
 
   useEffect(() => {
     api.getWeek(refDate).then(setData).catch(console.error)
@@ -61,7 +62,10 @@ export default function WeekView() {
     )
   }
 
-  const { days, habits } = data
+  const { days, habits: allHabits } = data
+  const habits = catFilter === 'pro'   ? allHabits.filter(h => h.category === 'pro')
+               : catFilter === 'perso' ? allHabits.filter(h => h.category !== 'pro')
+               : allHabits
   const dayLabels = days.map(d => DOW[new Date(d + 'T00:00:00').getDay()])
   const weekNum = isoWeekNum(days[0])
   const rangeLabel = `${days[0].slice(8)} — ${days[6].slice(8)} ${new Date(days[6] + 'T00:00:00').toLocaleDateString('fr-FR', { month: 'short' })}`
@@ -96,6 +100,15 @@ export default function WeekView() {
               style={{ flex: 1, padding: '7px 10px', borderRadius: 8, textAlign: 'center', background: s.active ? FORGE.surface : 'transparent', border: s.active ? `1px solid ${FORGE.lineHot}` : `1px solid ${FORGE.line}`, color: s.active ? FORGE.fg : FORGE.fgDim, fontFamily: FORGE.mono, fontSize: 11, fontWeight: 500, position: 'relative', cursor: 'pointer' }}>
               {s.active && <div style={{ position: 'absolute', top: -1, left: 6, right: 6, height: 1, background: FORGE.cyan, boxShadow: `0 0 4px ${FORGE.cyan}` }} />}
               {s.label}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+          {[['all', 'Tout'], ['perso', 'Perso'], ['pro', 'Pro']].map(([f, label]) => (
+            <div key={f} onClick={() => setCatFilter(f)}
+              style={{ padding: '3px 10px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
+              {label}
             </div>
           ))}
         </div>
