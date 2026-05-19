@@ -79,7 +79,6 @@ export default function CreateHabit() {
     try {
       await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null })
       await loadDashboard()
-      localStorage.setItem('forge_ready', '1')
       navigate('/dashboard')
     } catch (e) {
       console.error(e)

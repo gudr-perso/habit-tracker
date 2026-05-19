@@ -187,13 +187,17 @@ export default function Menu() {
         {/* Danger zone */}
         <div style={{ padding: '4px 2px 0', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Réglages</div>
         <ForgeBox accent={FORGE.fire} pad={0}>
-          <div onClick={() => { if (window.confirm('Recommencer l\'onboarding ?')) { localStorage.removeItem('forge_ready'); navigate('/onboarding') } }}
+          <div onClick={() => navigate('/profil')}
             style={{ padding: '14px 16px', fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: FORGE.fgDim, cursor: 'pointer', borderBottom: `1px solid ${FORGE.lineSoft}` }}>
-            Modifier mon profil / classe
+            Modifier mon profil / classe →
           </div>
-          <div onClick={() => { if (window.confirm('Supprimer TOUTES les données ? Cette action est irréversible.')) { api.updateProfile({ xp: 0, level: 1, xp_next: 500, streak: 0, record_streak: 0 }).then(() => loadDashboard()) } }}
-            style={{ padding: '14px 16px', fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: FORGE.fire, cursor: 'pointer' }}>
-            Réinitialiser la progression
+          <div onClick={() => { if (window.confirm('Réinitialiser la progression (XP, niveaux) ? Tes habitudes sont conservées.')) { api.updateProfile({ xp: 0, level: 1, xp_next: 500, streak: 0, record_streak: 0 }).then(() => loadDashboard()) } }}
+            style={{ padding: '14px 16px', fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: FORGE.fire, cursor: 'pointer', borderBottom: `1px solid ${FORGE.lineSoft}` }}>
+            Réinitialiser la progression XP
+          </div>
+          <div onClick={() => { if (window.confirm('Relancer l\'onboarding ? Ton profil et tes habitudes sont conservés.')) { api.updateProfile({ onboarded: 0 }).then(async () => { await loadDashboard(); navigate('/onboarding') }) } }}
+            style={{ padding: '14px 16px', fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: FORGE.fgFaint, cursor: 'pointer' }}>
+            Relancer l'onboarding
           </div>
         </ForgeBox>
       </div>

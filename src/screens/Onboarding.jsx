@@ -25,9 +25,8 @@ export default function Onboarding() {
     if (!name.trim() || saving) return
     setSaving(true)
     try {
-      await api.updateProfile({ name: name.trim(), class: selectedClass })
+      await api.updateProfile({ name: name.trim(), class: selectedClass, onboarded: 1 })
       await loadDashboard()
-      localStorage.setItem('forge_ready', '1')
       navigate('/create')
     } catch (e) {
       console.error(e)

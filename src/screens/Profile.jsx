@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
-import { api } from '../api'
 import { useApp } from '../AppContext'
+import { api } from '../api'
 import Status from '../components/Status'
 import ForgeBox from '../components/ForgeBox'
 import ForgeTag from '../components/ForgeTag'
@@ -155,9 +155,9 @@ export default function Profile() {
 
         {/* Danger zone */}
         <div
-          onClick={() => { if (window.confirm('Recommencer l\'onboarding ?')) { localStorage.removeItem('forge_ready'); navigate('/onboarding') } }}
+          onClick={() => { if (window.confirm('Relancer l\'onboarding ? Ton profil et tes habitudes sont conservés.')) { api.updateProfile({ onboarded: 0 }).then(async () => { await loadDashboard(); navigate('/onboarding') }) } }}
           style={{ textAlign: 'center', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, cursor: 'pointer', padding: '8px 0', letterSpacing: 0.5 }}
-        >Réinitialiser le profil →</div>
+        >Relancer l'onboarding →</div>
       </div>
 
       <ForgeNav />
