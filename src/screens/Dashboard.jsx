@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { useApp } from '../AppContext'
+import { getLevelTitle } from '../lib/levels'
 import Status from '../components/Status'
 import ForgeBox from '../components/ForgeBox'
 import ForgeTag from '../components/ForgeTag'
@@ -58,7 +59,7 @@ export default function Dashboard() {
           </div>
           <div>
             <div style={{ fontFamily: FORGE.sans, fontSize: 17, fontWeight: 700, color: FORGE.fg, letterSpacing: -0.2, lineHeight: 1.1 }}>{p.name ?? 'Romain'}</div>
-            <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.cyan, letterSpacing: 1, marginTop: 2 }}>{p.active_title ? `« ${p.active_title} »` : `« ${p.class?.toUpperCase() ?? 'SAGE'} »`}</div>
+            <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.cyan, letterSpacing: 1, marginTop: 2 }}>« {p.active_title || getLevelTitle(p.class, p.level ?? 1)} »</div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>

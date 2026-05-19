@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { useApp } from '../AppContext'
 import { api } from '../api'
+import { getLevelTitle, getNextTitle, CLASS_TITLES } from '../lib/levels'
 import Status from '../components/Status'
 import ForgeBox from '../components/ForgeBox'
 import ForgeTag from '../components/ForgeTag'
@@ -246,17 +247,41 @@ export default function Profile() {
         })()}
 
         {/* Class card */}
-        <ForgeBox accent={classInfo.color} glow={classInfo.color}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: `${classInfo.color}22`, border: `1.5px solid ${classInfo.color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: classInfo.color, boxShadow: `0 0 12px ${classInfo.color}44`, flexShrink: 0 }}>{classInfo.g}</div>
-            <div>
-              <ForgeTag color={classInfo.color}>Classe · {classInfo.label}</ForgeTag>
-              <div style={{ marginTop: 6, fontFamily: FORGE.mono, fontSize: 10.5, color: FORGE.fgDim }}>
-                {p.active_title ? `Titre actif : « ${p.active_title} »` : 'Aucun titre actif'}
+        {(() => {
+          const currentTitle = p.active_title || getLevelTitle(p.class, p.level ?? 1)
+          const next = getNextTitle(p.class, p.level ?? 1)
+          const tiers = CLASS_TITLES[p.class] || CLASS_TITLES.sage
+          return (
+            <ForgeBox accent={classInfo.color} glow={classInfo.color}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${classInfo.color}22`, border: `1.5px solid ${classInfo.color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: classInfo.color, boxShadow: `0 0 12px ${classInfo.color}44`, flexShrink: 0 }}>{classInfo.g}</div>
+                <div>
+                  <ForgeTag color={classInfo.color}>Classe · {classInfo.label}</ForgeTag>
+                  <div style={{ marginTop: 5, fontFamily: FORGE.sans, fontWeight: 700, fontSize: 15, color: classInfo.color }}>
+                    « {currentTitle} »
+                  </div>
+                  {next && (
+                    <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.fgFaint, marginTop: 2 }}>
+                      prochain : {next.title} · LV {next.level}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        </ForgeBox>
+              {/* Paliers */}
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {tiers.map(([minLv, name]) => {
+                  const unlocked = (p.level ?? 1) >= minLv
+                  const isCurrent = currentTitle === name
+                  return (
+                    <div key={minLv} style={{ padding: '4px 8px', borderRadius: 6, background: isCurrent ? `${classInfo.color}33` : unlocked ? `${classInfo.color}11` : 'transparent', border: `1px solid ${isCurrent ? classInfo.color : unlocked ? classInfo.color + '44' : FORGE.line}`, fontFamily: FORGE.mono, fontSize: 9, color: isCurrent ? classInfo.color : unlocked ? classInfo.color + 'aa' : FORGE.fgFaint, letterSpacing: 0.3 }}>
+                      {name} <span style={{ opacity: 0.6 }}>·{minLv}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </ForgeBox>
+          )
+        })()}
 
         {/* Badges placeholder */}
         <ForgeBox accent={FORGE.yellow} pad={14}>
