@@ -156,33 +156,45 @@ export default function Profile() {
         </div>
 
         {/* Yesterday widget */}
-        {yesterdayData && yesterdayData.habits.length > 0 && (() => {
+        {yesterdayData && (() => {
+          const allDaily   = yesterdayData.habits        ?? []
+          const allWeekly  = yesterdayData.weeklyHabits  ?? []
+          if (allDaily.length === 0 && allWeekly.length === 0) return null
+
           const yDate = new Date(yesterday + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-          const filtered = catFilter === 'pro'
-            ? yesterdayData.habits.filter(h => h.category === 'pro')
-            : yesterdayData.habits
-          const doneCnt = filtered.filter(h => h.log?.done).length
+
+          const applyFilter = arr =>
+            catFilter === 'pro'   ? arr.filter(h => h.category === 'pro')
+            : catFilter === 'perso' ? arr.filter(h => h.category !== 'pro')
+            : arr
+
+          const filtered       = applyFilter(allDaily)
+          const filteredWeekly = applyFilter(allWeekly)
+          const allFiltered    = [...filtered, ...filteredWeekly]
+          const doneCnt        = allFiltered.filter(h => h.log?.done).length
+          const allDone        = doneCnt === allFiltered.length && allFiltered.length > 0
+
           return (
-            <ForgeBox accent={doneCnt === filtered.length ? FORGE.green : FORGE.fire}>
+            <ForgeBox accent={allDone ? FORGE.green : FORGE.fire}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div>
-                  <ForgeTag color={doneCnt === filtered.length ? FORGE.green : FORGE.fire}>
-                    Hier · {doneCnt}/{filtered.length}
+                  <ForgeTag color={allDone ? FORGE.green : FORGE.fire}>
+                    Hier · {doneCnt}/{allFiltered.length}
                   </ForgeTag>
                   <div style={{ fontFamily: FORGE.mono, fontSize: 9, color: FORGE.fgFaint, marginTop: 3, textTransform: 'uppercase', letterSpacing: 1 }}>{yDate}</div>
                 </div>
-                {/* Filtre pro / tout */}
                 <div style={{ display: 'flex', gap: 4 }}>
-                  {['all', 'pro'].map(f => (
+                  {[['all', 'Tout'], ['perso', 'Perso'], ['pro', 'Pro']].map(([f, lbl]) => (
                     <div key={f} onClick={() => setCatFilter(f)}
-                      style={{ padding: '4px 10px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
-                      {f === 'all' ? 'Tout' : 'Pro'}
+                      style={{ padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: FORGE.mono, fontSize: 9.5, textTransform: 'uppercase', letterSpacing: 0.8, background: catFilter === f ? `${FORGE.purple}22` : 'transparent', border: `1px solid ${catFilter === f ? FORGE.purple : FORGE.line}`, color: catFilter === f ? FORGE.purple : FORGE.fgFaint }}>
+                      {lbl}
                     </div>
                   ))}
                 </div>
               </div>
-              {filtered.length === 0 ? (
-                <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint, textAlign: 'center', padding: '6px 0' }}>Aucune habitude "pro"</div>
+
+              {allFiltered.length === 0 ? (
+                <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint, textAlign: 'center', padding: '6px 0' }}>Aucune habitude dans ce filtre</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {filtered.map(h => {
@@ -197,6 +209,31 @@ export default function Profile() {
                         <div style={{ flex: 1 }}>
                           <div style={{ fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: done ? FORGE.fg : FORGE.fgDim }}>{h.name}</div>
                           <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.fgFaint, marginTop: 1 }}>{h.category} · {done ? `+${h.xp_per_session} XP` : 'non fait'}</div>
+                        </div>
+                        {!done && <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fire, letterSpacing: 0.5 }}>rattraper</div>}
+                      </div>
+                    )
+                  })}
+                  {filteredWeekly.map(h => {
+                    const done = !!h.log?.done
+                    const isToggling = togglingId === h.id
+                    const pct = Math.min((h.weekly_done ?? 0) / (h.weekly_target ?? 1), 1)
+                    return (
+                      <div key={h.id} onClick={() => !isToggling && toggleYesterday(h)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: done ? `${h.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? h.color + '44' : FORGE.line}`, cursor: 'pointer', opacity: isToggling ? 0.5 : 1, transition: 'all 0.15s' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: done ? `${h.color}33` : 'rgba(255,255,255,0.05)', border: `1px solid ${done ? h.color : FORGE.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: done ? h.color : FORGE.fgFaint, flexShrink: 0 }}>
+                          {done ? '✓' : h.icon}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: FORGE.sans, fontWeight: 600, fontSize: 13, color: done ? FORGE.fg : FORGE.fgDim }}>{h.name}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                            <div style={{ flex: 1, height: 3, background: FORGE.lineSoft, borderRadius: 2 }}>
+                              <div style={{ height: '100%', width: `${pct * 100}%`, background: pct >= 1 ? FORGE.green : h.color, borderRadius: 2 }} />
+                            </div>
+                            <span style={{ fontFamily: FORGE.mono, fontSize: 9, color: pct >= 1 ? FORGE.green : FORGE.fgFaint, whiteSpace: 'nowrap' }}>
+                              {h.weekly_done ?? 0}/{h.weekly_target} sem.
+                            </span>
+                          </div>
                         </div>
                         {!done && <div style={{ fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fire, letterSpacing: 0.5 }}>rattraper</div>}
                       </div>
