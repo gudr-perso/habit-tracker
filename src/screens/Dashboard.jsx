@@ -59,7 +59,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 10 }}>
           <ForgeBox glow={FORGE.blueGlow} accent={FORGE.blue} style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', inset: 0, opacity: 0.5, backgroundImage: `radial-gradient(circle at 80% 110%, ${FORGE.blueGlow}33, transparent 55%)`, borderRadius: 12 }} />

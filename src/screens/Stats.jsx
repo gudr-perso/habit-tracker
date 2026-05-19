@@ -56,7 +56,7 @@ export default function Stats() {
       <Status dark />
       <ForgeBar title="Stats" sub="insights" right={<span style={{ color: FORGE.fgDim, fontFamily: FORGE.mono, fontSize: 16 }}>⌕</span>} />
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', gap: 4 }}>
           {RANGES.map((r, i) => (
             <div key={r.label}

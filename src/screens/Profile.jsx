@@ -125,7 +125,7 @@ export default function Profile() {
         )}
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
 
         {/* XP bar */}
         <ForgeBox accent={FORGE.purple} glow={FORGE.purple}>
