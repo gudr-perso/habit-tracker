@@ -90,7 +90,6 @@ function BadgeCard({ badge, unlockedAt, rarityColor }) {
           boxShadow: unlockedAt ? `0 0 10px ${rarityColor}33` : 'none',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           padding: '10px 6px', gap: 6, cursor: 'pointer',
-          opacity: unlockedAt ? 1 : 0.4,
           transition: 'all 0.15s',
           position: 'relative', overflow: 'hidden',
         }}
@@ -98,8 +97,8 @@ function BadgeCard({ badge, unlockedAt, rarityColor }) {
         {unlockedAt && (
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${rarityColor}, transparent)` }} />
         )}
-        <div style={{ fontSize: 26, lineHeight: 1, filter: unlockedAt ? 'none' : 'grayscale(1)' }}>{badge.icon}</div>
-        <div style={{ fontFamily: FORGE.mono, fontSize: 8.5, fontWeight: 700, color: unlockedAt ? rarityColor : FORGE.fgFaint, textAlign: 'center', lineHeight: 1.3, letterSpacing: 0.2 }}>
+        <div style={{ fontSize: 26, lineHeight: 1, filter: unlockedAt ? 'none' : 'grayscale(1) opacity(0.45)' }}>{badge.icon}</div>
+        <div style={{ fontFamily: FORGE.mono, fontSize: 8.5, fontWeight: 700, color: unlockedAt ? rarityColor : FORGE.fgDim, textAlign: 'center', lineHeight: 1.3, letterSpacing: 0.2 }}>
           {badge.name}
         </div>
         {!unlockedAt && (
