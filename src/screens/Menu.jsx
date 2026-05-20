@@ -222,6 +222,7 @@ export default function Menu() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
             { label: '+ Nouvelle habitude', color: FORGE.cyan,   path: '/create' },
+            { label: '◆ Tâches ToDo',       color: FORGE.todo,   path: '/todo' },
             { label: '🔔 Notifications',    color: FORGE.purple, path: '/notifications' },
             { label: '📊 Statistiques',     color: FORGE.blue,   path: '/stats' },
             { label: '👤 Profil',           color: FORGE.fire,   path: '/profil' },

@@ -10,6 +10,12 @@ function isScheduled(habit, todayNum) {
   try { return JSON.parse(habit.days).includes(todayNum) } catch { return true }
 }
 
+function offsetDate(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url)
   const date = url.searchParams.get('date') || new Date().toISOString().slice(0, 10)
@@ -31,7 +37,6 @@ export async function onRequestGet({ env, request }) {
   // Logs du jour pour les habitudes quotidiennes
   const dailyIds = dailyHabits.map(h => h.id)
   let habitsWithLog = []
-  let completion = 0
 
   if (dailyIds.length) {
     const placeholders = dailyIds.map(() => '?').join(',')
@@ -40,11 +45,9 @@ export async function onRequestGet({ env, request }) {
     ).bind(date, ...dailyIds).all()
     const logByHabit = Object.fromEntries(logs.map(l => [l.habit_id, l]))
     habitsWithLog = dailyHabits.map(h => ({ ...h, log: logByHabit[h.id] ?? null }))
-    const done = habitsWithLog.filter(h => h.log?.done).length
-    completion = Math.round((done / dailyHabits.length) * 100)
   }
 
-  // Logs pour les habitudes hebdomadaires : aujourd'hui + toute la semaine
+  // Logs pour les habitudes hebdomadaires
   let weeklyWithProgress = []
   if (weeklyHabits.length) {
     const weekStart = getMonday(date)
@@ -64,5 +67,35 @@ export async function onRequestGet({ env, request }) {
     }))
   }
 
-  return Response.json({ profile, habits: habitsWithLog, weeklyHabits: weeklyWithProgress, date, completion })
+  // Notion tasks du jour
+  const { results: notionTasks } = await env.DB.prepare(
+    `SELECT * FROM notion_tasks WHERE sync_date = ? AND done = 0`
+  ).bind(date).all()
+
+  // TODO tasks dans la fenêtre J-7 à J+7
+  const dMinus7 = offsetDate(date, -7)
+  const dPlus7  = offsetDate(date, +7)
+  const { results: todoTasks } = await env.DB.prepare(
+    `SELECT * FROM todo_tasks WHERE done = 0 AND due_date IS NOT NULL
+     AND due_date >= ? AND due_date <= ?`
+  ).bind(dMinus7, dPlus7).all()
+
+  const notionRows = notionTasks.map(t => ({
+    id: t.id, name: t.name, icon: 'N', color: '#9BA3AF',
+    category: 'notion', type: 'boolean', xp_per_session: 5,
+    _source: 'notion', date_start: t.date_start, date_end: t.date_end, log: null,
+  }))
+  const todoRows = todoTasks.map(t => ({
+    id: t.id, name: t.name, icon: '◆', color: '#F59E0B',
+    category: 'todo', type: 'boolean', xp_per_session: 10,
+    _source: 'todo', due_date: t.due_date, log: null,
+  }))
+
+  const allRows = [...habitsWithLog, ...notionRows, ...todoRows]
+  const done = allRows.filter(h => h.log?.done).length
+  const completion = dailyHabits.length
+    ? Math.round((habitsWithLog.filter(h => h.log?.done).length / dailyHabits.length) * 100)
+    : 0
+
+  return Response.json({ profile, habits: allRows, weeklyHabits: weeklyWithProgress, date, completion })
 }

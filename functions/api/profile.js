@@ -5,7 +5,9 @@ export async function onRequestGet({ env }) {
 
 export async function onRequestPut({ env, request }) {
   const body = await request.json()
-  const allowed = ['name', 'class', 'level', 'xp', 'xp_next', 'streak', 'record_streak', 'active_title', 'onboarded']
+  const allowed = ['name', 'class', 'level', 'xp', 'xp_next', 'streak', 'record_streak', 'active_title', 'onboarded',
+                   'notion_database_id', 'notion_api_key', 'notion_checkbox_field',
+                   'notion_date_start_field', 'notion_date_end_field']
   const sets = []
   const values = []
   for (const key of allowed) {

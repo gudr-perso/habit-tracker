@@ -17,6 +17,8 @@ export const FORGE = {
   green:     '#22e08a',
   purple:    '#a47cff',
   yellow:    '#ffce4b',
+  notion:    '#9BA3AF',
+  todo:      '#F59E0B',
   sans:      '"Space Grotesk", "Inter Tight", system-ui, sans-serif',
   mono:      '"JetBrains Mono", ui-monospace, monospace',
 };

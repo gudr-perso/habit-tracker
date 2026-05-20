@@ -34,4 +34,14 @@ export const api = {
   getWeek:      (date)        => req(`/week?date=${date}`),
   getMonth:     (date)        => req(`/month?date=${date}`),
   getStats:     (days, to)    => req(`/stats?days=${days}&to=${to}`),
+
+  /* Notion */
+  syncNotion:     ()    => req('/notion/sync'),
+  doneNotionTask: (id)  => req(`/notion/tasks/${id}/done`, { method: 'POST' }),
+
+  /* Todos */
+  getTodos:    ()       => req('/todos'),
+  createTodo:  (data)   => req('/todos', { method: 'POST', body: data }),
+  deleteTodo:  (id)     => req(`/todos/${id}`, { method: 'DELETE' }),
+  doneTodo:    (id)     => req(`/todos/${id}/done`, { method: 'POST' }),
 }

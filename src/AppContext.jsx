@@ -27,14 +27,29 @@ export function AppProvider({ children }) {
     }
   }, [date])
 
-  useEffect(() => { loadDashboard(date) }, [date])
+  // Au démarrage : sync Notion en silencieux puis charge le dashboard
+  useEffect(() => {
+    async function init() {
+      try { await api.syncNotion() } catch (_) { /* silencieux */ }
+      await loadDashboard(date)
+    }
+    init()
+  }, [date])
 
-  const toggleLog = useCallback(async (habitId, done, xpPerSession) => {
-    await api.upsertLog(habitId, {
-      date,
-      done: done ? 1 : 0,
-      xp_earned: done ? xpPerSession : 0,
-    })
+  const toggleLog = useCallback(async (habitId, done, xpPerSession, source) => {
+    if (source === 'notion') {
+      if (done) await api.doneNotionTask(habitId)
+      // décocher non supporté pour les tâches Notion
+    } else if (source === 'todo') {
+      if (done) await api.doneTodo(habitId)
+      // décocher non supporté pour les tâches ToDo
+    } else {
+      await api.upsertLog(habitId, {
+        date,
+        done: done ? 1 : 0,
+        xp_earned: done ? xpPerSession : 0,
+      })
+    }
     await loadDashboard(date)
   }, [date, loadDashboard])
 

@@ -302,6 +302,17 @@ export default function Profile() {
           <div onClick={() => navigate('/stats')} style={{ flex: 1, padding: '12px 14px', borderRadius: 12, background: FORGE.surface, border: `1px solid ${FORGE.line}`, fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgDim, cursor: 'pointer', textAlign: 'center' }}>📊 Stats</div>
         </div>
 
+        {/* Notion */}
+        <div onClick={() => navigate('/notion-settings')}
+          style={{ padding: '12px 16px', borderRadius: 12, background: FORGE.surface, border: `1px solid ${FORGE.line}`, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: `${FORGE.notion}22`, border: `1px solid ${FORGE.notion}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, color: FORGE.notion, flexShrink: 0 }}>N</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.notion }}>Intégration Notion</div>
+            <div style={{ fontFamily: FORGE.mono, fontSize: 9.5, color: FORGE.fgFaint, marginTop: 2 }}>config · sync</div>
+          </div>
+          <div style={{ fontFamily: FORGE.mono, fontSize: 11, color: FORGE.fgFaint }}>→</div>
+        </div>
+
         {/* Danger zone */}
         <div
           onClick={() => { if (window.confirm('Relancer l\'onboarding ? Ton profil et tes habitudes sont conservés.')) { api.updateProfile({ onboarded: 0 }).then(async () => { await loadDashboard(); navigate('/onboarding') }) } }}

@@ -16,8 +16,52 @@ function fmtDate(iso) {
   return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 }
 
+function fmtNotionDate(start, end) {
+  if (!start && !end) return 'notion'
+  const opts = { day: 'numeric', month: 'short' }
+  const timeOpts = { hour: '2-digit', minute: '2-digit' }
+  try {
+    if (start && end && start !== end) {
+      const s = new Date(start)
+      const e = new Date(end)
+      // dates avec heure (ISO contient 'T')
+      if (start.includes('T')) {
+        return `${s.toLocaleDateString('fr-FR', { weekday: 'short', ...opts })} · ${s.toLocaleTimeString('fr-FR', timeOpts)} → ${e.toLocaleTimeString('fr-FR', timeOpts)}`
+      }
+      return `${s.toLocaleDateString('fr-FR', opts)} → ${e.toLocaleDateString('fr-FR', opts)}`
+    }
+    if (start) {
+      const s = new Date(start)
+      if (start.includes('T')) {
+        return `${s.toLocaleDateString('fr-FR', { weekday: 'short', ...opts })} · ${s.toLocaleTimeString('fr-FR', timeOpts)}`
+      }
+      return s.toLocaleDateString('fr-FR', opts)
+    }
+  } catch (_) {}
+  return 'notion'
+}
+
+function fmtDueDate(due) {
+  if (!due) return 'ToDo'
+  const today = new Date().toISOString().slice(0, 10)
+  if (due === today) return '◆ Échéance : auj.'
+  if (due < today) {
+    const d = new Date(due + 'T00:00:00')
+    return `⚠ En retard · ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
+  }
+  const d = new Date(due + 'T00:00:00')
+  return `◆ Échéance : ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
+}
+
 function habitColor(h) {
-  const map = { '#5dd7ff': FORGE.cyan, '#3aa8ff': FORGE.blue, '#ff7a1a': FORGE.fire, '#a47cff': FORGE.purple }
+  const map = {
+    '#5dd7ff': FORGE.cyan,
+    '#3aa8ff': FORGE.blue,
+    '#ff7a1a': FORGE.fire,
+    '#a47cff': FORGE.purple,
+    '#9BA3AF': FORGE.notion,
+    '#F59E0B': FORGE.todo,
+  }
   return map[h.color] || h.color
 }
 
@@ -125,26 +169,39 @@ export default function Dashboard() {
           {habits.map((h) => {
             const color = habitColor(h)
             const done = !!h.log?.done
+            const isNotion = h._source === 'notion'
+            const isTodo   = h._source === 'todo'
+
+            // Sous-titre
+            let subtitle
+            if (isNotion) subtitle = fmtNotionDate(h.date_start, h.date_end)
+            else if (isTodo) subtitle = fmtDueDate(h.due_date)
+            else subtitle = `${h.category} · ${h.type}${h.reminder_time ? ' · ' + h.reminder_time : ''}`
+
             return (
-              <ForgeBox key={h.id} pad={0} style={{ overflow: 'hidden' }}>
+              <ForgeBox key={`${h._source ?? 'habit'}-${h.id}`} pad={0} style={{ overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'stretch' }}>
                   <div style={{ width: 3, background: color, boxShadow: `0 0 8px ${color}aa` }} />
                   <div
-                    style={{ width: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? `${color}1f` : 'transparent', color, fontSize: 22, cursor: 'pointer', flexShrink: 0 }}
-                    onClick={() => toggleLog(h.id, !done, h.xp_per_session)}
+                    style={{ width: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? `${color}1f` : 'transparent', color, fontSize: isNotion ? 16 : 22, fontWeight: isNotion ? 700 : 400, cursor: 'pointer', flexShrink: 0 }}
+                    onClick={() => toggleLog(h.id, !done, h.xp_per_session, h._source)}
                   >
-                    {done ? <span style={{ textShadow: `0 0 8px ${color}` }}>✓</span> : h.icon}
+                    {done
+                      ? <span style={{ textShadow: `0 0 8px ${color}` }}>✓</span>
+                      : isNotion ? 'N'
+                      : isTodo ? '◆'
+                      : h.icon}
                   </div>
-                  <div style={{ flex: 1, padding: '11px 12px', minWidth: 0, cursor: 'pointer' }} onClick={() => navigate(`/habit/${h.id}`)}>
+                  <div style={{ flex: 1, padding: '11px 12px', minWidth: 0, cursor: isNotion || isTodo ? 'default' : 'pointer' }}
+                    onClick={() => !isNotion && !isTodo && navigate(`/habit/${h.id}`)}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                       <span style={{ fontFamily: FORGE.sans, fontWeight: 600, fontSize: 14, color: FORGE.fg, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.name}</span>
                       <span style={{ fontFamily: FORGE.mono, fontSize: 11, color: done ? FORGE.green : color, fontWeight: 600, whiteSpace: 'nowrap' }}>
                         +{h.xp_per_session}<span style={{ color: FORGE.fgFaint, marginLeft: 2, fontSize: 9 }}>XP</span>
                       </span>
                     </div>
-                    <div style={{ marginTop: 4, fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgDim }}>
-                      {h.category} · {h.type}
-                      {h.reminder_time && <span style={{ color: FORGE.fgFaint }}> · {h.reminder_time}</span>}
+                    <div style={{ marginTop: 4, fontFamily: FORGE.mono, fontSize: 10, color: isNotion || isTodo ? color : FORGE.fgDim }}>
+                      {subtitle}
                     </div>
                   </div>
                 </div>

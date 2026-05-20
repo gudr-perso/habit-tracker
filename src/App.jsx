@@ -12,6 +12,8 @@ import Profile       from './screens/Profile'
 import Notifications from './screens/Notifications'
 import Menu          from './screens/Menu'
 import Badges        from './screens/Badges'
+import Todo          from './screens/Todo'
+import NotionSettings from './screens/NotionSettings'
 
 function SmartRedirect() {
   const { loading, profile } = useApp()
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/menu"          element={<Menu />} />
           <Route path="/badges"        element={<Badges />} />
+          <Route path="/todo"          element={<Todo />} />
+          <Route path="/notion-settings" element={<NotionSettings />} />
         </Routes>
       </div>
     </div>
