@@ -92,10 +92,11 @@ export async function onRequestGet({ env, request }) {
   }))
 
   const allRows = [...habitsWithLog, ...notionRows, ...todoRows]
-  const done = allRows.filter(h => h.log?.done).length
-  const completion = dailyHabits.length
-    ? Math.round((habitsWithLog.filter(h => h.log?.done).length / dailyHabits.length) * 100)
-    : 0
+
+  // Complétion sur tout ce qui est affiché : daily + notion + todo + weekly
+  const allVisible = [...allRows, ...weeklyWithProgress]
+  const doneCount = allVisible.filter(h => h.log?.done).length
+  const completion = allVisible.length ? Math.round((doneCount / allVisible.length) * 100) : 0
 
   return Response.json({ profile, habits: allRows, weeklyHabits: weeklyWithProgress, date, completion })
 }

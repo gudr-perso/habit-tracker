@@ -126,7 +126,7 @@ export default function Dashboard() {
               </div>
               <div style={{ marginTop: 10 }}><ForgeGauge value={completion / 100} color={FORGE.blue} segments height={6} /></div>
               <div style={{ marginTop: 6, fontFamily: FORGE.mono, fontSize: 10.5, color: FORGE.fgDim }}>
-                {habits.filter(h => h.log?.done).length} / {habits.length} habitudes
+                {habits.filter(h => h.log?.done).length + weeklyHabits.filter(h => h.log?.done).length} / {habits.length + weeklyHabits.length} habitudes
               </div>
             </div>
           </ForgeBox>
