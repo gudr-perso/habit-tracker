@@ -1,5 +1,23 @@
 import { evaluateBadges } from '../../_badgeEval.js'
 
+async function cancelChildLogs(env, habitId, date) {
+  const { results } = await env.DB.prepare(
+    'SELECT id FROM habits WHERE parent_habit_id = ? AND active = 1'
+  ).bind(habitId).all()
+  for (const child of results) {
+    const childLog = await env.DB.prepare(
+      'SELECT id, xp_earned FROM habit_logs WHERE habit_id = ? AND date = ? AND done = 1'
+    ).bind(child.id, date).first()
+    if (childLog) {
+      await env.DB.prepare('UPDATE habit_logs SET done = 0, xp_earned = 0 WHERE id = ?').bind(childLog.id).run()
+      if (childLog.xp_earned > 0) {
+        await env.DB.prepare('UPDATE profile SET xp = MAX(0, xp - ?) WHERE id = 1').bind(childLog.xp_earned).run()
+      }
+      await cancelChildLogs(env, child.id, date)
+    }
+  }
+}
+
 function getMonday(dateStr) {
   const d = new Date(dateStr + 'T00:00:00Z')
   const day = d.getUTCDay() || 7
@@ -50,6 +68,9 @@ export async function onRequestPost({ env, params, request }) {
      VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(habit_id, date) DO UPDATE SET done=excluded.done, value=excluded.value, note=excluded.note, xp_earned=excluded.xp_earned`
   ).bind(params.id, date, done, value, note, xp_earned).run()
+
+  // Si parent décoché, annuler récursivement les logs des enfants
+  if (!done) await cancelChildLogs(env, params.id, date)
 
   // XP + level-up (courbe exponentielle : xp_next = 500 × 1.3^level)
   if (done && xp_earned > 0) {

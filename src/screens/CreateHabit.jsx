@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FORGE } from '../theme'
 import { api } from '../api'
@@ -66,6 +66,12 @@ export default function CreateHabit() {
   const [selectedDays, setSelectedDays] = useState([1, 2, 3, 4, 5, 6, 7])
   const [habitMode, setHabitMode] = useState('daily')   // 'daily' | 'weekly'
   const [weeklyTarget, setWeeklyTarget] = useState(3)
+  const [parentHabitId, setParentHabitId] = useState(null)
+  const [allHabits, setAllHabits] = useState([])
+
+  useEffect(() => {
+    api.getHabits().then(setAllHabits).catch(() => {})
+  }, [])
 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
 
@@ -94,7 +100,7 @@ export default function CreateHabit() {
     try {
       const days = selectedDays.length === 7 ? null : JSON.stringify(selectedDays)
       const weekly_target = habitMode === 'weekly' ? weeklyTarget : null
-      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null, days, weekly_target })
+      await api.createHabit({ ...form, name: form.name.trim(), reminder_time: form.reminder_time || null, days, weekly_target, parent_habit_id: parentHabitId })
       await loadDashboard()
       navigate('/dashboard')
     } catch (e) {
@@ -294,6 +300,32 @@ export default function CreateHabit() {
             </div>
           </div>
         </ForgeBox>
+
+        {/* Habitude liée */}
+        {allHabits.length > 0 && (
+          <>
+            <div style={{ padding: '0 2px', fontFamily: FORGE.mono, fontSize: 10, color: FORGE.fgFaint, letterSpacing: 1.5, textTransform: 'uppercase' }}>Lié à (optionnel)</div>
+            <ForgeBox accent={parentHabitId ? activeColor : undefined} pad={0}>
+              <div onClick={() => setParentHabitId(null)}
+                style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                <div style={{ width: 16, height: 16, borderRadius: 999, border: `1.5px solid ${!parentHabitId ? FORGE.fgDim : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {!parentHabitId && <div style={{ width: 6, height: 6, borderRadius: 999, background: FORGE.fgDim }} />}
+                </div>
+                <div style={{ fontFamily: FORGE.sans, fontSize: 13.5, color: !parentHabitId ? FORGE.fg : FORGE.fgDim, fontWeight: !parentHabitId ? 600 : 400 }}>Aucune</div>
+              </div>
+              {allHabits.map(h => (
+                <div key={h.id} onClick={() => setParentHabitId(h.id)}
+                  style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderTop: `1px solid ${FORGE.line}`, cursor: 'pointer' }}>
+                  <div style={{ width: 16, height: 16, borderRadius: 999, border: `1.5px solid ${parentHabitId === h.id ? activeColor : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {parentHabitId === h.id && <div style={{ width: 6, height: 6, borderRadius: 999, background: activeColor, boxShadow: `0 0 6px ${activeColor}` }} />}
+                  </div>
+                  <span style={{ fontSize: 16, color: h.color }}>{h.icon}</span>
+                  <div style={{ fontFamily: FORGE.sans, fontSize: 13.5, color: parentHabitId === h.id ? FORGE.fg : FORGE.fgDim, fontWeight: parentHabitId === h.id ? 600 : 400 }}>{h.name}</div>
+                </div>
+              ))}
+            </ForgeBox>
+          </>
+        )}
         </div>
       </div>
 

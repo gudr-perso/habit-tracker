@@ -67,6 +67,13 @@ export async function onRequestGet({ env, request }) {
     }))
   }
 
+  // Filtrage par parent : masquer si le parent n'est pas complété aujourd'hui
+  const doneIds = new Set(
+    [...habitsWithLog, ...weeklyWithProgress].filter(h => h.log?.done).map(h => h.id)
+  )
+  habitsWithLog      = habitsWithLog.filter(h => !h.parent_habit_id || doneIds.has(h.parent_habit_id))
+  weeklyWithProgress = weeklyWithProgress.filter(h => !h.parent_habit_id || doneIds.has(h.parent_habit_id))
+
   // Notion tasks du jour
   const { results: notionTasks } = await env.DB.prepare(
     `SELECT * FROM notion_tasks WHERE sync_date = ? AND done = 0`
